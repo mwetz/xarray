@@ -371,6 +371,8 @@ def map_blocks(
     else:
         # template xarray object has been provided with proper sizes and chunk shapes
         indexes = dict(template._indexes)
+        # FIXME: Fix to avoid duplicate dimensions bug when a template with stacked dimensions is provided
+        indexes = {i:j for i, j in indexes.items() if i in template.indexes.dims}
         output_chunks = template.chunksizes
         if not output_chunks:
             raise ValueError(
@@ -505,7 +507,8 @@ def map_blocks(
         # mapping from variable name to dask graph key
         var_key_map: dict[Hashable, str] = {}
         for name, variable in template.variables.items():
-            if name in indexes:
+            # FIXME: Indexes now no longer contains components x any y from multiindex so we need to check input_indexes
+            if name in input_indexes: # if name in indexes:
                 continue
             gname_l = f"{name}-{gname}"
             var_key_map[name] = gname_l
