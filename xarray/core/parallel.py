@@ -178,6 +178,9 @@ def subset_dataset_to_block(
     chunk_dims_set = set(chunk_index)
     variable: Variable
     for name, variable in dataset.variables.items():
+        # FIXME: Patch for stacked multiindex
+        if name in dataset.coords and name not in dataset.dims:
+            continue
         # make a task that creates tuple of (dims, chunk)
         if dask.is_dask_collection(variable.data):
             # get task name for chunk
